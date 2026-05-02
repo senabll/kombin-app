@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Kombin Önerici</title>
+</head>
+<body>
+
+<h2>Kombin Önerici 👕👖</h2>
+
+<h3>Kıyafetlerini gir (virgülle ayır):</h3>
+
+Üstler: <input id="tops" value="beyaz tişört,siyah gömlek,mavi kazak"><br><br>
+Altlar: <input id="bottoms" value="kot pantolon,siyah pantolon,şort"><br><br>
+Ayakkabı: <input id="shoes" value="spor ayakkabı,bot,loafer"><br><br>
+
+<button onclick="kombinOlustur()">Kombin Öner</button>
+
+<h3 id="sonuc"></h3>
+
+<script>
+function randomSec(liste) {
+  return liste[Math.floor(Math.random() * liste.length)];
+}
+
+function kombinOlustur() {
+  let tops = document.getElementById("tops").value.split(",");
+  let bottoms = document.getElementById("bottoms").value.split(",");
+  let shoes = document.getElementById("shoes").value.split(",");
+
+  let kombin = `
+    👕 ${randomSec(tops)} <br>
+    👖 ${randomSec(bottoms)} <br>
+    👟 ${randomSec(shoes)}
+  `;
+
+  document.getElementById("sonuc").innerHTML = kombin;
+}
+</script>
+
+</body>
+</html>
