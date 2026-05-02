@@ -1,42 +1,107 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>Kombin Önerici</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akıllı Gardırop</title>
+    <style>
+        :root { --primary: #6c5ce7; --secondary: #a29bfe; --bg: #f9f9fb; --text: #2d3436; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); width: 100%; max-width: 450px; margin-bottom: 20px; }
+        h2 { margin-top: 0; color: var(--primary); font-size: 1.5rem; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        input, select { flex: 1; padding: 12px; border: 2px solid #eee; border-radius: 10px; outline: none; }
+        button { cursor: pointer; border: none; transition: 0.3s; font-weight: bold; }
+        .add-btn { background: var(--primary); color: white; padding: 12px 20px; border-radius: 10px; }
+        .kombin-btn { background: #00b894; color: white; width: 100%; padding: 15px; border-radius: 15px; font-size: 1.1rem; margin-top: 10px; }
+        .kombin-result { background: #f0fff4; border: 2px dashed #00b894; padding: 20px; border-radius: 15px; margin-top: 20px; line-height: 1.6; }
+        .inventory { max-height: 200px; overflow-y: auto; text-align: left; font-size: 0.9rem; }
+        .item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .delete-btn { color: #ff7675; font-size: 0.8rem; background: none; }
+    </style>
 </head>
 <body>
 
-<h2>Kombin Önerici 👕👖</h2>
+    <!-- KOMBİN OLUŞTURMA KARTI -->
+    <div class="card">
+        <h2>✨ Günün Kombini</h2>
+        <button class="kombin-btn" onclick="kombinYap()">Rastgele Kombin Seç</button>
+        <div id="kombinEkranı" class="kombin-result">Henüz kombin oluşturulmadı.</div>
+    </div>
 
-<h3>Kıyafetlerini gir (virgülle ayır):</h3>
+    <!-- KIYAFET EKLEME KARTI -->
+    <div class="card">
+        <h2>➕ Yeni Parça Ekle</h2>
+        <div class="input-group">
+            <input type="text" id="kiyafetAdi" placeholder="Örn: Mavi Gömlek">
+            <select id="kategori">
+                <option value="Ust">Üst</option>
+                <option value="Alt">Alt</option>
+                <option value="Ayakkabi">Ayakkabı</option>
+            </select>
+            <button class="add-btn" onclick="ekle()">Ekle</button>
+        </div>
+        <div class="inventory" id="liste">
+            <!-- Kıyafetler buraya listelenecek -->
+        </div>
+    </div>
 
-Üstler: <input id="tops" value="beyaz tişört,siyah gömlek,mavi kazak"><br><br>
-Altlar: <input id="bottoms" value="kot pantolon,siyah pantolon,şort"><br><br>
-Ayakkabı: <input id="shoes" value="spor ayakkabı,bot,loafer"><br><br>
+    <script>
+        // Verileri başlat (Hafızadan al veya boş obje oluştur)
+        let gardirobum = JSON.parse(localStorage.getItem('gardirobim_verisi')) || { Ust: [], Alt: [], Ayakkabi: [] };
 
-<button onclick="kombinOlustur()">Kombin Öner</button>
+        function ekle() {
+            const ad = document.getElementById('kiyafetAdi').value;
+            const kat = document.getElementById('kategori').value;
+            
+            if(ad === "") return alert("Lütfen bir isim yaz!");
+            
+            gardirobum[kat].push(ad);
+            kaydet();
+            listele();
+            document.getElementById('kiyafetAdi').value = "";
+        }
 
-<h3 id="sonuc"></h3>
+        function sil(kat, index) {
+            gardirobum[kat].splice(index, 1);
+            kaydet();
+            listele();
+        }
 
-<script>
-function randomSec(liste) {
-  return liste[Math.floor(Math.random() * liste.length)];
-}
+        function kaydet() {
+            localStorage.setItem('gardirobim_verisi', JSON.stringify(gardirobum));
+        }
 
-function kombinOlustur() {
-  let tops = document.getElementById("tops").value.split(",");
-  let bottoms = document.getElementById("bottoms").value.split(",");
-  let shoes = document.getElementById("shoes").value.split(",");
+        function listele() {
+            let html = "";
+            for (let kat in gardirobum) {
+                gardirobum[kat].forEach((urun, index) => {
+                    html += `<div class="item">
+                        <span><strong>[${kat}]</strong> ${urun}</span>
+                        <button class="delete-btn" onclick="sil('${kat}', ${index})">SİL</button>
+                    </div>`;
+                });
+            }
+            document.getElementById('liste').innerHTML = html;
+        }
 
-  let kombin = `
-    👕 ${randomSec(tops)} <br>
-    👖 ${randomSec(bottoms)} <br>
-    👟 ${randomSec(shoes)}
-  `;
+        function kombinYap() {
+            if(gardirobum.Ust.length == 0 || gardirobum.Alt.length == 0) {
+                return alert("Kombin yapabilmek için en az bir üst ve bir alt eklemelisin!");
+            }
+            
+            const r = (dizi) => dizi[Math.floor(Math.random() * dizi.length)];
+            
+            const sonuc = `
+                👕 <strong>Üst:</strong> ${r(gardirobum.Ust)} <br>
+                👖 <strong>Alt:</strong> ${r(gardirobum.Alt)} <br>
+                👟 <strong>Ayakkabı:</strong> ${gardirobum.Ayakkabi.length > 0 ? r(gardirobum.Ayakkabi) : 'Çıplak Ayak :)'}
+            `;
+            document.getElementById('kombinEkranı').innerHTML = sonuc;
+        }
 
-  document.getElementById("sonuc").innerHTML = kombin;
-}
-</script>
-
+        // Sayfa açıldığında listeyi göster
+        listele();
+    </script>
 </body>
-</html> 
+</html>
